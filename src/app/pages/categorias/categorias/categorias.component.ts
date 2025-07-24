@@ -1,18 +1,19 @@
 
 import { Component, OnInit } from '@angular/core';
-import { SlicePipe , CommonModule } from '@angular/common';
-import { HttpClient,HttpClientModule } from '@angular/common/http';
+import { SlicePipe, CommonModule } from '@angular/common';
+import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { CategoriasService } from '../../../core/services/categorias.service';
 import { Router } from '@angular/router';
+import { FormularioCategoriaComponent } from "../../../components/formulario-categoria/formulario-categoria.component";
 
 @Component({
   selector: 'app-categorias',
   standalone: true,
-  imports: [SlicePipe, HttpClientModule, CommonModule],
+  imports: [SlicePipe, HttpClientModule, CommonModule, FormularioCategoriaComponent],
   templateUrl: './categorias.component.html',
   styleUrl: './categorias.component.css'
 })
-export class CategoriasComponent {
+export class CategoriasComponent implements OnInit {
   categorias: any[] = [];
   nombre: string = '';
   imagen: string = '';
@@ -24,7 +25,7 @@ export class CategoriasComponent {
   constructor(private http: HttpClient,
     private router: Router,
     private categoriasService: CategoriasService
-  ) {  }
+  ) { }
 
   ngOnInit(): void {
     this.obtenerCategorias();
@@ -37,7 +38,7 @@ export class CategoriasComponent {
   obtenerCategorias() {
     this.categoriasService.getCategorias().subscribe(data => {
       this.categorias = data;
-      console.log("categorias obtenerCategorias", this.categorias);
+      // console.log("categorias obtenerCategorias", this.categorias);
     });
   }
 

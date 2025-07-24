@@ -34,12 +34,8 @@
       {{ categoria.nombre }}
     </h2>
     <!-- Imagen -->
-    <img [src]="categoria.imagen || 'default.jpg'" alt="{{ categoria.nombre }}"
+    <img src="{{ categoria.imagen }}"
       class="w-full h-40 object-cover rounded-lg mb-3" (error)="onImageError($event)" />
-    <!-- Descripción -->
-    <!-- <p class="text-gray-600 text-sm mb-4 text-center line-clamp-2">
-      {{ categoria.descripcion || 'Sin descripción disponible.' }}
-    </p> -->
     <!-- Descripción -->
     <p class="text-gray-600 text-sm mb-2 text-center">
       {{ verMas[categoria._id] ? categoria.descripcion : (categoria.descripcion | slice:0:100) + '...' }}
@@ -61,4 +57,4 @@
 </div>
 
 <!-- Modal para crear categorias -->
-<!-- <app-categoria-crear-formulario></app-categoria-crear-formulario> -->
+ <app-formulario-categoria></app-formulario-categoria>
