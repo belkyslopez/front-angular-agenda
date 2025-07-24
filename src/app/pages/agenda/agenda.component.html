@@ -1,0 +1,56 @@
+<h2 class="text-2xl font-bold text-pink-600 text-center mt-4">
+  Agendar cita para: {{ servicioNombre | titlecase }}
+</h2>
+
+<!-- calendario -->
+<!-- <div class="week">
+  <div
+    class="day"
+    *ngFor="let day of days"
+    [class.today]="day.toDateString() === (today | date: 'fullDate')">
+    <span class="name">{{ dayNames[day.getDay()] }}</span>
+    <span class="number">{{ day.getDate() }}</span>
+  </div>
+</div> -->
+
+<div class="nav">
+  <strong>{{ days[0] | date:'dd/MM/yyyy' }} - {{ days[6] | date:'dd/MM/yyyy' }}</strong>
+  <button (click)="nextWeek()">Siguiente ›</button>
+</div>
+
+<div class="week">
+  <div
+    class="day"
+    *ngFor="let day of days"
+    [class.today]="day.toDateString() === today.toDateString()">
+    <span class="name">{{ dayNames[day.getDay()] }}</span>
+    <span class="number">{{ day.getDate() }}</span>
+  </div>
+</div>
+
+<!--  formulario agendar-->
+  <!-- <form [formGroup]="miForm" (ngSubmit)="agendarCitaAServicio()" -->
+<form [formGroup]="miForm"
+  class="max-w-md mx-auto mt-6 space-y-4 p-4 bg-white rounded-xl shadow">
+  <input type="text" formControlName="nombreCliente" name="nombre" placeholder="Tu nombre"
+    class="w-full p-2 border rounded" required>
+  <input type="text" formControlName="telefono" name="telefono" placeholder="Celular"
+    class="w-full p-2 border rounded" required>
+  <input type="date" formControlName="fecha" name="fecha" class="w-full p-2 border rounded" required>
+  <input type="time" formControlName="hora" name="hora" class="w-full p-2 border rounded" required>
+  <!-- <button class="bg-pink-500 hover:bg-pink-600 text-white text-sm px-4 py-2 rounded-lg w-full transition duration-200">
+    Agendar
+  </button> -->
+  <button class="w-full bg-pink-500 text-white py-2 rounded-xl hover:bg-pink-600">Agendar</button>
+</form>
+
+<!-- Contenedor de tarjetas responsivo -->
+<div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 px-4 mt-6">
+  <div *ngFor="let cita of citas" class="relative bg-white rounded-2xl shadow-md p-4">
+    <h2 class="text-xl font-bold text-pink-600 mb-2 text-center">
+      {{ cita.titulo }}
+    </h2>
+    <p class="text-center text-gray-600">{{ cita.fecha | date: 'shortDate'}} a las {{ cita.hora | date:
+     'HH:mm' }}</p>
+  </div>
+</div>

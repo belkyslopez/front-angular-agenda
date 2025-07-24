@@ -14,7 +14,7 @@ export const routes: Routes = [
   },
       {
     path: 'agendar/servicio/:id',
-    loadComponent: () => import('./pages/servicios/servicios.component')
-      .then(m => m.ServiciosComponent)
+    loadComponent: () => import('./pages/agenda/agenda.component')
+      .then(m => m.AgendaComponent)
   },
 ];
