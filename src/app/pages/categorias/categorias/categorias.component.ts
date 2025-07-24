@@ -43,7 +43,9 @@ export class CategoriasComponent implements OnInit {
   }
 
   verServicioxCategoria(_id: number) {
+    console.log("entro a verServicioxCategoria");
     this.router.navigate(['/servicios/categoria', _id]);
+    console.log("_id: ", _id);
   }
 
   // abrir modal para editar
@@ -87,7 +89,7 @@ export class CategoriasComponent implements OnInit {
     }
   }
 
-  onImageError(event: any) {
-    event.target.src = 'assets/default.jpeg';
-  }
+  // onImageError(event: any) {
+  //   event.target.src = 'assets/default.jpeg';
+  // }
 }

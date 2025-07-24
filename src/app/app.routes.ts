@@ -7,4 +7,14 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/categorias/categorias/categorias.component')
       .then(m => m.CategoriasComponent)
   },
+    {
+    path: 'servicios/categoria/:id',
+    loadComponent: () => import('./pages/servicios/servicios.component')
+      .then(m => m.ServiciosComponent)
+  },
+      {
+    path: 'agendar/servicio/:id',
+    loadComponent: () => import('./pages/servicios/servicios.component')
+      .then(m => m.ServiciosComponent)
+  },
 ];

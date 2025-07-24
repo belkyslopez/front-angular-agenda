@@ -25,7 +25,8 @@ export class FormularioCategoriaComponent implements OnInit{
     this.miFormulario = this.fb.group({
       nombre: ['Nueva categoria '],
       descripcion: ['Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum fermentum pulvinar lorem, ac mattis libero lobortis eu. Ut sed arcu velit. Aliquam ut vulputate quam, ac lobortis ligula. Integer a bibendum libero, quis aliquet neque. Quisque fermentum vehicula est, sed scelerisque lacus dapibus et. Cras ac ante risus. '],
-      imagen: ['assets/imagenes/default.jpg']
+      // imagen: ['assets/imagenes/default.jpg']
+      imagen: ['https://picsum.photos/id/1/200/300']
     });
   }
 

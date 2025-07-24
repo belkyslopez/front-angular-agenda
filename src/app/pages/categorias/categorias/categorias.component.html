@@ -35,7 +35,7 @@
     </h2>
     <!-- Imagen -->
     <img src="{{ categoria.imagen }}"
-      class="w-full h-40 object-cover rounded-lg mb-3" (error)="onImageError($event)" />
+      class="w-full h-40 object-cover rounded-lg mb-3" />
     <!-- Descripción -->
     <p class="text-gray-600 text-sm mb-2 text-center">
       {{ verMas[categoria._id] ? categoria.descripcion : (categoria.descripcion | slice:0:100) + '...' }}
