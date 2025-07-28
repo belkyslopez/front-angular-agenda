@@ -1,56 +1,134 @@
-<h2 class="text-2xl font-bold text-pink-600 text-center mt-4">
+<!-- Título -->
+<h2 class="text-2xl font-bold text-pink-600 text-center mt-6">
   Agendar cita para: {{ servicioNombre | titlecase }}
 </h2>
 
-<!-- calendario -->
-<!-- <div class="week">
-  <div
-    class="day"
-    *ngFor="let day of days"
-    [class.today]="day.toDateString() === (today | date: 'fullDate')">
-    <span class="name">{{ dayNames[day.getDay()] }}</span>
-    <span class="number">{{ day.getDate() }}</span>
-  </div>
-</div> -->
-
-<div class="nav">
-  <strong>{{ days[0] | date:'dd/MM/yyyy' }} - {{ days[6] | date:'dd/MM/yyyy' }}</strong>
-  <button (click)="nextWeek()">Siguiente ›</button>
+<!-- Navegación de semana -->
+<div class="flex justify-between items-center max-w-md mx-auto mt-6 px-4">
+  <button (click)="prevWeek()" class="text-sm text-pink-600 hover:underline">
+    ‹ Anterior
+  </button>
+  <strong class="text-gray-700">
+    {{ days[0] | date:'dd/MM/yyyy' }} - {{ days[6] | date:'dd/MM/yyyy' }}
+  </strong>
+  <button (click)="nextWeek()" class="text-sm text-pink-600 hover:underline">
+    Siguiente ›
+  </button>
 </div>
 
-<div class="week">
+<!-- Semana (calendario) -->
+<div class="flex justify-center gap-2 mt-4">
   <div
-    class="day"
     *ngFor="let day of days"
-    [class.today]="day.toDateString() === today.toDateString()">
-    <span class="name">{{ dayNames[day.getDay()] }}</span>
-    <span class="number">{{ day.getDate() }}</span>
+    (click)="seleccionarDia(day)"
+    [class.bg-pink-100]="isToday(day)"
+    [class.bg-gray-100]="isPast(day)"
+    [class.text-gray-400]="isPast(day)"
+    [class.cursor-not-allowed]="isPast(day)"
+    [class.cursor-pointer]="!isPast(day)"
+    class="flex flex-col items-center p-3 border rounded-lg w-20 transition">
+    <span class="text-sm font-medium">
+      {{ dayNames[day.getDay()] }}
+    </span>
+    <span class="text-lg font-bold">
+      {{ day.getDate() }}
+    </span>
   </div>
 </div>
 
-<!--  formulario agendar-->
-  <!-- <form [formGroup]="miForm" (ngSubmit)="agendarCitaAServicio()" -->
-<form [formGroup]="miForm"
-  class="max-w-md mx-auto mt-6 space-y-4 p-4 bg-white rounded-xl shadow">
-  <input type="text" formControlName="nombreCliente" name="nombre" placeholder="Tu nombre"
-    class="w-full p-2 border rounded" required>
-  <input type="text" formControlName="telefono" name="telefono" placeholder="Celular"
-    class="w-full p-2 border rounded" required>
-  <input type="date" formControlName="fecha" name="fecha" class="w-full p-2 border rounded" required>
-  <input type="time" formControlName="hora" name="hora" class="w-full p-2 border rounded" required>
-  <!-- <button class="bg-pink-500 hover:bg-pink-600 text-white text-sm px-4 py-2 rounded-lg w-full transition duration-200">
+<!-- Horas disponibles -->
+ <div class="max-w-md mx-auto bg-white p-6 shadow-md rounded-lg">
+  <div *ngIf="fechaSeleccionada">
+    <h2 class="text-lg font-semibold mb-2">Horas disponibles para {{ fechaSeleccionada | date:'EEEE d MMMM y' }}:</h2>
+    <div *ngIf="horasDisponibles.length > 0; else sinHoras">
+      <ul class="space-y-1">
+        <li *ngFor="let hora of horasDisponibles" class="px-4 py-2 bg-gray-100 rounded">
+          {{ hora }}
+        </li>
+      </ul>
+    </div>
+    <ng-template #sinHoras>
+      <p class="text-sm text-red-500">No hay horas disponibles para esta fecha.</p>
+    </ng-template>
+  </div>
+</div>
+
+<!-- Servicio seleccionado -->
+<div class="max-w-md mx-auto bg-white shadow-lg rounded-2xl p-6 border">
+  <h2 class="text-xl font-bold text-gray-800 mb-4">Corte de Cabello</h2>
+
+  <div class="space-y-2 text-sm text-gray-600">
+    <p><span class="font-semibold">Fecha:</span> 24/07/2025</p>
+    <p><span class="font-semibold">Hora:</span> 14:30</p>
+    <p><span class="font-semibold">Colaborador:</span> Juan Pérez</p>
+    <p><span class="font-semibold">Precio:</span> $10.000</p>
+  </div>
+</div>
+
+<!-- datos de contacto -->
+ <div class="max-w-md mx-auto bg-white shadow-md rounded-2xl p-6 border border-gray-200">
+  <h2 class="text-xl font-bold text-gray-800 mb-4">Información del Cliente</h2>
+
+  <div class="space-y-2 text-sm text-gray-700">
+    <p><span class="font-semibold">Nombre:</span> Belkys</p>
+    <p><span class="font-semibold">Apellido:</span> López</p>
+    <p><span class="font-semibold">Email:</span> belkiscarolina1gmail.com</p>
+    <p><span class="font-semibold">Teléfono:</span> 934067430</p>
+    <p><span class="font-semibold">Observaciones:</span> ...</p>
+  </div>
+</div>
+
+<!-- Formulario para agendar cita -->
+<form
+  [formGroup]="miForm"
+  (ngSubmit)="agendarCitaAServicio()"
+  class="max-w-md mx-auto mt-8 space-y-4 p-6 bg-white rounded-xl shadow-lg"
+>
+  <input
+    type="text"
+    formControlName="nombreCliente"
+    placeholder="Tu nombre"
+    class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-400"
+    required
+  />
+  <input
+    type="text"
+    formControlName="telefono"
+    placeholder="Celular"
+    class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-400"
+    required
+  />
+  <input
+    type="date"
+    formControlName="fecha"
+    class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-400"
+    required
+  />
+  <input
+    type="time"
+    formControlName="hora"
+    class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-400"
+    required
+  />
+  <button
+    type="submit"
+    class="w-full bg-pink-500 text-white py-2 rounded-xl hover:bg-pink-600 transition duration-200"
+  >
     Agendar
-  </button> -->
-  <button class="w-full bg-pink-500 text-white py-2 rounded-xl hover:bg-pink-600">Agendar</button>
+  </button>
 </form>
 
-<!-- Contenedor de tarjetas responsivo -->
-<div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 px-4 mt-6">
-  <div *ngFor="let cita of citas" class="relative bg-white rounded-2xl shadow-md p-4">
-    <h2 class="text-xl font-bold text-pink-600 mb-2 text-center">
+<!-- Lista de citas -->
+<div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 px-4 mt-10">
+  <div
+    *ngFor="let cita of citas"
+    class="bg-white rounded-2xl shadow-md p-4 border hover:shadow-lg transition duration-200"
+  >
+    <h2 class="text-xl font-bold text-pink-600 mb-1 text-center">
       {{ cita.titulo }}
     </h2>
-    <p class="text-center text-gray-600">{{ cita.fecha | date: 'shortDate'}} a las {{ cita.hora | date:
-     'HH:mm' }}</p>
+    <p class="text-center text-gray-600">
+      {{ cita.fecha | date: 'shortDate'}} a las {{ cita.hora | date: 'HH:mm' }}
+    </p>
   </div>
 </div>

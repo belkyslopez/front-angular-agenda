@@ -33,3 +33,11 @@
   font-size: 1.25rem;
   font-weight: 600;
 }
+
+.nav { margin-bottom: 8px; display:flex; gap:8px; align-items:center; }
+.week { display:flex; gap:4px; }
+.day { flex:1; text-align:center; padding:8px; border:1px solid #ddd; border-radius:6px; }
+.today { background:#3b82f6; color:#fff; font-weight:bold; }
+.name { display:block; font-size:.75rem; color:#6b7280; }
+.today .name { color:#eff6ff; }
+.number { font-size:1.25rem; font-weight:600; }

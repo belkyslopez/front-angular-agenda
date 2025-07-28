@@ -17,17 +17,37 @@ import { CommonModule } from '@angular/common';
   styleUrl: './agenda.component.css'
 })
 export class AgendaComponent {
-  // Días de la semana a mostrar (7 días)
-  // days = Array.from({ length: 7 }, (_, i) => {
-  //   const d = new Date();
-  //   d.setDate(d.getDate() + i);   // hoy, mañana, pasado…
-  //   return d;
-  // });
-
   // Para pintar el nombre del día
   dayNames = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
   today = new Date();
   weekStart = this.startOfWeek(this.today);   // lunes de esta semana
+  fechaSeleccionada: Date | null = null;
+  horasDisponibles: string[] = [];
+
+  todasLasHoras: { [fechaISO: string]: string[] } = {
+    '2025-07-25': ['09:00', '10:00', '11:30', '15:00'],
+    '2025-07-26': ['10:00', '14:00', '16:30'],
+  };
+
+  isPast(date: Date): boolean {
+    const d = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+    const t = new Date(this.today.getFullYear(), this.today.getMonth(), this.today.getDate());
+    return d < t;
+  }
+
+  isToday(date: Date): boolean {
+    const d = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+    const t = new Date(this.today.getFullYear(), this.today.getMonth(), this.today.getDate());
+    return d.getTime() === t.getTime();
+  }
+
+  seleccionarDia(dia: Date): void {
+  if (this.isPast(dia)) return;
+  this.fechaSeleccionada = dia;
+  const fechaISO = dia.toISOString().split('T')[0];
+  this.miForm.get('fecha')?.setValue(fechaISO); // actualiza el form
+  this.horasDisponibles = this.todasLasHoras[fechaISO] || []; // muestra disponibilidad
+}
 
 
   miForm: FormGroup;
@@ -88,6 +108,10 @@ export class AgendaComponent {
     d.setHours(0, 0, 0, 0);
     return d;
   }
+  prevWeek() {
+    this.weekStart.setDate(this.weekStart.getDate() - 7);
+    this.weekStart = new Date(this.weekStart);   // fuerza detección de cambios
+  }
 
   nextWeek() {
     this.weekStart.setDate(this.weekStart.getDate() + 7);
@@ -110,28 +134,28 @@ export class AgendaComponent {
   //   });
   // }
 
-  // agendarCitaAServicio() {
-  //   console.log("entro a agregarServicio");
-  //   this.miForm.patchValue({
-  //     servicio: this.agendaService.getServicioId()
-  //   });
-  //   console.log("entro a agendarCitaAServicio");
-  //   if (this.miForm.valid) {
-  //     const datos = this.miForm.value;
-  //     console.log("datos: ", datos);
-  //     this.agendaService.agregarCitaAServicio(datos).subscribe(
-  //       res => {
-  //         console.log('Cita guardada:', res);
-  //       },
-  //       err => {
-  //         console.error('Error al guardar la cita:', err);
-  //       }
-  //     );
-  //     console.log('Cita guardada:', datos);
-  //           // window.location.reload();
-  //   } else {
-  //     this.miForm.markAllAsTouched();
-  //   }
-  // }
+  agendarCitaAServicio() {
+    console.log("entro a agregarServicio");
+    this.miForm.patchValue({
+      servicio: this.agendaService.getServicioId()
+    });
+    console.log("entro a agendarCitaAServicio");
+    if (this.miForm.valid) {
+      const datos = this.miForm.value;
+      console.log("datos: ", datos);
+      this.agendaService.agregarCitaAServicio(datos).subscribe(
+        res => {
+          console.log('Cita guardada:', res);
+        },
+        err => {
+          console.error('Error al guardar la cita:', err);
+        }
+      );
+      console.log('Cita guardada:', datos);
+      // window.location.reload();
+    } else {
+      this.miForm.markAllAsTouched();
+    }
+  }
 
 }
