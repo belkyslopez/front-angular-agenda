@@ -5,6 +5,8 @@ import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { ServiciosService } from '../../core/services/servicios.service';
 import { ActivatedRoute } from '@angular/router';
 import { FormularioServicioComponent } from '../../components/formulario-servicio/formulario-servicio.component';
+import { CategoriasService } from '../../core/services/categorias.service';
+import { AgendaService } from '../../core/services/agenda.service';
 
 @Component({
   selector: 'app-servicios',
@@ -18,8 +20,10 @@ export class ServiciosComponent implements OnInit {
   mostrarModal: boolean = false;
   modoEditar: boolean = false;
   categoriaId: string = '';
+  servicioId: string = '';
   categoriaNombre: string = ''; // propiedad nueva
-  nuevoServicio: any = {
+  categoria: any = {};
+  nuevoServicio = {
     categoria: '',
     nombre: '',
     descripcion: '',
@@ -27,9 +31,11 @@ export class ServiciosComponent implements OnInit {
     precio: null,
     imagen: ''
   };
-    constructor(private router: Router,
+  constructor(private router: Router,
     private http: HttpClient,
     private serviciosService: ServiciosService,
+    private agendaService: AgendaService,
+    private categoriasService: CategoriasService,
     private route: ActivatedRoute
   ) { }
 
@@ -40,16 +46,17 @@ export class ServiciosComponent implements OnInit {
   }
 
   obtenerServiciosPorCategoria() {
-    if (!this.categoriaId) return;
-    this.serviciosService.getServiciosPorCategoria(this.categoriaId).subscribe((data:any) => {
+    this.serviciosService.getServiciosPorCategoria(this.categoriaId).subscribe((data: any) => {
       this.servicios = data;
-      // console.log("Servicios de la categoría", this.servicios);
+      this.categoriasService.guardarCategoria(this.servicios[0].categoria);
+      this.categoria = this.categoriasService.consultarCategoria();
+      this.agendaService.setServicioId(this.servicioId);
     });
   }
 
   agendarServicio(servicio: any) {
-    console.log("entro a agendar ==> ", servicio);
-    this.router.navigate(['/agendar/servicio', servicio.id || servicio._id]);
+    this.agendaService.guardarServicio(servicio);
+    this.router.navigate(['/agendar/servicio']);
   }
 
   modificarServicio(servicio: any) {
@@ -76,7 +83,6 @@ export class ServiciosComponent implements OnInit {
   }
 
   abrirModal() {
-    console.log("entro a abrirModal");
     this.serviciosService.abrir();
   }
   cerrarModal() {

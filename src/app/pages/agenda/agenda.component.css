@@ -41,3 +41,23 @@
 .name { display:block; font-size:.75rem; color:#6b7280; }
 .today .name { color:#eff6ff; }
 .number { font-size:1.25rem; font-weight:600; }
+
+
+.slots {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.slot {
+  padding: 8px 12px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.slot.selected {
+  background-color: #3b82f6;
+  color: white;
+}

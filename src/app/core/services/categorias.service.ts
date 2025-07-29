@@ -15,10 +15,11 @@ export class CategoriasService {
   private mostrarModalSubject = new BehaviorSubject<boolean>(false);
   modal$ = this.mostrarModalSubject.asObservable();
   private apiUrl = 'http://localhost:3000/api/categorias';
+  categoria = {};
 
   constructor(private http: HttpClient) { }
 
-   getCategorias() {
+  getCategorias() {
     return this.http.get<any[]>(this.apiUrl);
   }
 
@@ -32,5 +33,13 @@ export class CategoriasService {
 
   cerrar() {
     this.mostrarModalSubject.next(false);
+  }
+
+  guardarCategoria(categoria: string) {
+    this.categoria = categoria;
+  }
+
+  consultarCategoria() {
+    return this.categoria;
   }
 }

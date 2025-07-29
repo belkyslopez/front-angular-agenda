@@ -13,7 +13,7 @@ export const routes: Routes = [
       .then(m => m.ServiciosComponent)
   },
       {
-    path: 'agendar/servicio/:id',
+    path: 'agendar/servicio',
     loadComponent: () => import('./pages/agenda/agenda.component')
       .then(m => m.AgendaComponent)
   },

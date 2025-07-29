@@ -16,6 +16,7 @@ export interface Cita {
 export class AgendaService {
   servicioId: string = '';
   private apiUrl = 'http://localhost:3000/api/citas'; // Ruta del backend Node.js
+  servicio = {};
 
   constructor(private http: HttpClient) { }
 
@@ -30,7 +31,7 @@ export class AgendaService {
     return this.http.get(`${this.apiUrl}/servicios/${servicioId}`);
   }
 
-  agregarCitaAServicio( cita: any): Observable<any> {
+  agregarCitaAServicio(cita: any): Observable<any> {
     return this.http.post(`${this.apiUrl}`, cita);
   }
 
@@ -50,5 +51,22 @@ export class AgendaService {
 
   getServicioId() {
     return this.servicioId;
+  }
+
+  guardarServicio(servicio:any) {
+    this.servicio = servicio;
+  }
+
+  consultarServicio() {
+    console.log("servicio: ", this.servicio);
+    return this.servicio;
+  }
+
+ getAvailability(date: string): Observable<string[]> {
+  return this.http.get<string[]>(`http://localhost:3000/api/citas/availability?date=${date}`);
+}
+
+  bookSlot(body: { date: string, duration: number }) {
+    return this.http.post('http://localhost:3000/book', body);
   }
 }

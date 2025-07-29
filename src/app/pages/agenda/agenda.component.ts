@@ -25,8 +25,12 @@ export class AgendaComponent {
   horasDisponibles: string[] = [];
 
   todasLasHoras: { [fechaISO: string]: string[] } = {
-    '2025-07-25': ['09:00', '10:00', '11:30', '15:00'],
-    '2025-07-26': ['10:00', '14:00', '16:30'],
+    '2025-07-28': ['09:00', '11:00', '14:00', '16:00'],
+    '2025-07-29': ['09:00', '11:00', '14:00', '16:00'],
+     '2025-07-30': ['09:00', '11:00', '14:00', '16:00'],
+    '2025-07-31': ['09:00', '11:00', '14:00', '16:00'],
+     '2025-08-01': ['09:00', '11:00', '14:00', '16:00'],
+    '2025-08-02': ['09:00', '11:00', '13:00'],
   };
 
   isPast(date: Date): boolean {
@@ -42,19 +46,18 @@ export class AgendaComponent {
   }
 
   seleccionarDia(dia: Date): void {
-  if (this.isPast(dia)) return;
-  this.fechaSeleccionada = dia;
-  const fechaISO = dia.toISOString().split('T')[0];
-  this.miForm.get('fecha')?.setValue(fechaISO); // actualiza el form
-  this.horasDisponibles = this.todasLasHoras[fechaISO] || []; // muestra disponibilidad
-}
-
+    if (this.isPast(dia)) return;
+    this.fechaSeleccionada = dia;
+    const fechaISO = dia.toISOString().split('T')[0];
+    this.miForm.get('fecha')?.setValue(fechaISO); // actualiza el form
+    this.horasDisponibles = this.todasLasHoras[fechaISO] || []; // muestra disponibilidad
+  }
 
   miForm: FormGroup;
   servicioNombre: string = '';
   servicioId: string = '';
   citas: any;
-
+  servicio: any = {};
   nuevaCita: any = {
     servicio: '',
     nombreCliente: '',
@@ -80,14 +83,7 @@ export class AgendaComponent {
 
 
   ngOnInit(): void {
-    console.log("ngOnInit de agenda.component.ts");
-    this.servicioId = this.route.snapshot.paramMap.get('_id') || '';
-    this.servicioNombre = this.route.snapshot.paramMap.get('nombre') || '';
-    this.agendaService.setServicioId(this.servicioId);
-    console.log('setServicioId:', this.servicioId);
-    console.log('servicioId:', this.servicioId);
-    console.log('servicio recibido:', this.servicioNombre);
-    // this.obtenerCitasPorServicio();
+    this.servicio = this.agendaService.consultarServicio();
   }
 
   /* ── Getters para el template ── */
