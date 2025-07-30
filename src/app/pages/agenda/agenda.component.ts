@@ -23,6 +23,7 @@ export class AgendaComponent {
   weekStart = this.startOfWeek(this.today);   // lunes de esta semana
   fechaSeleccionada: Date | null = null;
   horasDisponibles: string[] = [];
+  horarios: any[] = [];
 
   todasLasHoras: { [fechaISO: string]: string[] } = {
     '2025-07-28': ['09:00', '11:00', '14:00', '16:00'],
@@ -52,7 +53,7 @@ export class AgendaComponent {
     this.miForm.get('fecha')?.setValue(fechaISO); // actualiza el form
     this.horasDisponibles = this.todasLasHoras[fechaISO] || []; // muestra disponibilidad
   }
-
+  fecha='2025-07-30';
   miForm: FormGroup;
   servicioNombre: string = '';
   servicioId: string = '';
@@ -84,6 +85,10 @@ export class AgendaComponent {
 
   ngOnInit(): void {
     this.servicio = this.agendaService.consultarServicio();
+    this.agendaService.getHorarios(this.fecha).subscribe(data => {
+      this.horarios = data;
+      console.log("horarios:",this.horarios);
+    });
   }
 
   /* ── Getters para el template ── */

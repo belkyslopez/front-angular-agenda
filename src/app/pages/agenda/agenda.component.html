@@ -36,6 +36,10 @@
   </div>
 </div>
 
+<div *ngFor="let h of horarios">
+  {{ h.hora_inicio }} - prueba {{ h.hora_fin }}
+</div>
+
 <!-- Horas disponibles -->
  <div class="max-w-md mx-auto bg-white p-6 shadow-md rounded-lg">
   <div *ngIf="fechaSeleccionada">

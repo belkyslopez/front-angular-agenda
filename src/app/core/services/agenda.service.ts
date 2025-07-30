@@ -53,7 +53,7 @@ export class AgendaService {
     return this.servicioId;
   }
 
-  guardarServicio(servicio:any) {
+  guardarServicio(servicio: any) {
     this.servicio = servicio;
   }
 
@@ -62,9 +62,13 @@ export class AgendaService {
     return this.servicio;
   }
 
- getAvailability(date: string): Observable<string[]> {
-  return this.http.get<string[]>(`http://localhost:3000/api/citas/availability?date=${date}`);
-}
+  getHorarios(fecha: string): Observable<any[]> {
+    return this.http.get<any[]>(`http://localhost:3000/api/horarios/${fecha}`);
+  }
+
+  getAvailability(date: string): Observable<string[]> {
+    return this.http.get<string[]>(`http://localhost:3000/api/citas/availability?date=${date}`);
+  }
 
   bookSlot(body: { date: string, duration: number }) {
     return this.http.post('http://localhost:3000/book', body);
