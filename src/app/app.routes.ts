@@ -7,12 +7,12 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/categorias/categorias/categorias.component')
       .then(m => m.CategoriasComponent)
   },
-    {
+  {
     path: 'servicios/categoria/:id',
     loadComponent: () => import('./pages/servicios/servicios.component')
       .then(m => m.ServiciosComponent)
   },
-      {
+  {
     path: 'agendar/servicio',
     loadComponent: () => import('./pages/agenda/agenda.component')
       .then(m => m.AgendaComponent)

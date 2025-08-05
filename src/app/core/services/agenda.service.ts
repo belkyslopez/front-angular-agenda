@@ -66,6 +66,10 @@ export class AgendaService {
     return this.http.get<any[]>(`http://localhost:3000/api/horarios/${fecha}`);
   }
 
+  getUsuarios(): Observable<any[]> {
+    return this.http.get<any[]>(`http://localhost:3000/api/usuarios`);
+  }
+
   getAvailability(date: string): Observable<string[]> {
     return this.http.get<string[]>(`http://localhost:3000/api/citas/availability?date=${date}`);
   }
