@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { Usuario } from '../interfaces/usuario';
 
 export interface Cita {
   _id?: string; // MongoDB genera este campo automáticamente
@@ -15,15 +16,16 @@ export interface Cita {
 })
 export class AgendaService {
   servicioId: string = '';
+  usuarioId: string = '';
+  clienteId: string = '';
   private apiUrl = 'http://localhost:3000/api/citas'; // Ruta del backend Node.js
   servicio = {};
 
   constructor(private http: HttpClient) { }
 
-
-  // Obtener todas las citas
-  getCitas(): Observable<Cita[]> {
-    return this.http.get<Cita[]>(this.apiUrl);
+  // Obtener todas las citas por usuario
+  getCitasxUsuario(usuarioId: string): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/usuario/${usuarioId}`);
   }
 
   // Obtener todas las citas por servicio
@@ -66,15 +68,19 @@ export class AgendaService {
     return this.http.get<any[]>(`http://localhost:3000/api/horarios/${fecha}`);
   }
 
+  getHorariosDisponibles(fecha: string, profesionalId: string): Observable<any[]> {
+  return this.http.get<any[]>(`http://localhost:3000/api/horarios/disponibles/${fecha}/${profesionalId}`);
+}
+
   getUsuarios(): Observable<any[]> {
     return this.http.get<any[]>(`http://localhost:3000/api/usuarios`);
   }
 
-  getAvailability(date: string): Observable<string[]> {
-    return this.http.get<string[]>(`http://localhost:3000/api/citas/availability?date=${date}`);
+  setClienteId(clienteId: any) {
+    this.clienteId = clienteId;
   }
 
-  bookSlot(body: { date: string, duration: number }) {
-    return this.http.post('http://localhost:3000/book', body);
+  getClienteId() {
+    return this.clienteId;
   }
 }

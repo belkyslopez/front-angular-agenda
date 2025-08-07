@@ -25,7 +25,28 @@ export class AgendaComponent implements OnInit {
   horasDisponibles: string[] = [];
   horarios: any[] = [];
   clientes: any[] = [];
+  cliente: any = null;
   profesionales: any[] = [];
+  fecha = '2025-07-31';
+  miForm: FormGroup;
+  servicioNombre: string = '';
+  servicioId: string = '';
+  citas: any[] = [];
+  servicio: any = {};
+  nuevaCita: any = {
+    servicio: '',
+    nombreCliente: '',
+    fecha: '',
+    hora: null,
+    precio: null,
+    imagen: ''
+  };
+  horaSeleccionada: string | null = null;
+  horaAgendada: string | null = null;
+  citaAgendada = false;
+  payload = {};
+  horarioSeleccionado: any;
+  profesionalSeleccionado: any;
 
   isPast(date: Date): boolean {
     const d = new Date(date.getFullYear(), date.getMonth(), date.getDate());
@@ -49,7 +70,7 @@ export class AgendaComponent implements OnInit {
       this.horarios = Array.isArray(data) ? data : [];
       // Filtra solo las horas disponibles para ese día
       this.horasDisponibles = this.horarios
-        .filter(h => h.fecha === fechaISO)
+        .filter(h => h.fecha === fechaISO && (h.disponible === true || !h.cita || h.estado !== 'ocupado'))
         .map(h => h.hora_inicio);
       // Si no hay horarios para ese día, asegúrate de que sea un array vacío
       if (!Array.isArray(this.horasDisponibles)) {
@@ -62,24 +83,6 @@ export class AgendaComponent implements OnInit {
       console.error('Error al obtener horarios:', error);
     });
   }
-
-  fecha = '2025-07-31';
-  miForm: FormGroup;
-  servicioNombre: string = '';
-  servicioId: string = '';
-  citas: any[] = [];
-  servicio: any = {};
-  nuevaCita: any = {
-    servicio: '',
-    nombreCliente: '',
-    fecha: '',
-    hora: null,
-    precio: null,
-    imagen: ''
-  };
-  horaSeleccionada: string | null = null;
-  horaAgendada: string | null = null;
-  citaAgendada = false;
 
   constructor(private route: ActivatedRoute,
     private agendaService: AgendaService,
@@ -98,38 +101,58 @@ export class AgendaComponent implements OnInit {
     });
   }
 
-
   ngOnInit(): void {
+    // Obtener el servicio desde el localStorage o servicio compartido
     this.servicio = this.agendaService.consultarServicio();
-    this.agendaService.getHorarios(this.fecha).subscribe(data => {
-      this.horarios = data;
-      console.log("horarios:", this.horarios);
-    });
+    // Si tienes el servicio, precargar el campo
+    if (this.servicio) {
+      this.miForm.patchValue({
+        servicio: this.servicio._id
+      });
+    }
+    // Obtener usuarios (clientes y profesionales)
     this.agendaService.getUsuarios().subscribe(data => {
+      console.log("data: get usuarios", data);
       this.clientes = data.filter(usuario => usuario.rol === 'cliente');
       this.profesionales = data.filter(usuario => usuario.rol === 'profesional');
       console.log("cliente:", this.clientes);
       console.log("profesional:", this.profesionales);
-    });
-    if (this.clientes.length > 0) {
-      // Asigna automáticamente el primer cliente para pruebas
-      this.miForm.patchValue({
-        nombreCliente: this.clientes[0].nombre,
-        apellidoCliente: this.clientes[0].apellido,
-        correoCliente: this.clientes[0].correo,
-        telefono: this.clientes[0].telefono
-      });
-    }
-    this.miForm.patchValue({
-      servicio: this.servicio?._id || ''
+      // Selecciona automáticamente el primer profesional y cliente
+      if (this.profesionales.length > 0) {
+        this.profesionalSeleccionado = this.profesionales[0];
+        // Ahora que tienes profesional y fecha, puedes cargar los horarios
+        const fechaISO = this.fechaSeleccionada?.toISOString().split('T')[0]; // Asegúrate de tener fechaSeleccionada definida
+        if (fechaISO) {
+          this.agendaService.getHorariosDisponibles(fechaISO, this.profesionalSeleccionado._id).subscribe(horarios => {
+            this.horasDisponibles = horarios.map(h => h.hora_inicio);
+            console.log("Horas disponibles:", this.horasDisponibles);
+          });
+        }
+      }
+      if (this.clientes.length > 0) {
+        const cliente = this.clientes[0];
+        this.miForm.patchValue({
+          nombreCliente: cliente.nombre,
+          apellidoCliente: cliente.apellido,
+          correoCliente: cliente.correo,
+          telefono: cliente.telefono
+        });
+      }
     });
   }
 
+
+  verCita(usuarioId: string): void {
+    console.log("entro a verCita");
+    console.log("usuarioId:", usuarioId);
+    this.router.navigate(['/cita', usuarioId]);
+  }
 
   seleccionarHora(hora: string): void {
     this.horaSeleccionada = hora;
     this.miForm.get('hora')?.setValue(hora);
     console.log('Hora seleccionada:', hora);
+    this.horarioSeleccionado = this.horaSeleccionada;
   }
 
   /* ── Getters para el template ── */
@@ -160,21 +183,6 @@ export class AgendaComponent implements OnInit {
     this.weekStart = new Date(this.weekStart);
   }
 
-
-  // obtenerCitasPorServicio() {
-  //   if (!this.servicioId) return;
-  //   this.agendaService.getCitasPorServicio(this.servicioId).subscribe(data => {
-  //     this.citas = data;
-  //     console.log("citas del servicio seleccionado", this.citas);
-  //   });
-  // }
-
-  // getCitas() {
-  //   this.agendaService.getCitas().subscribe(data => {
-  //     this.citas = data;
-  //     console.log("citas", this.citas);
-  //   });
-  // }
   agendarCitaAServicio() {
     console.log("agendarCitaAServicio...");
     // Validación del formulario
@@ -195,8 +203,13 @@ export class AgendaComponent implements OnInit {
         console.log('✅ Cita guardada:', res);
         this.horaAgendada = payload.hora;
         this.citaAgendada = true;
+        // Recargar horarios disponibles
+        this.seleccionarDia(new Date(payload.fecha));
+        // Quitar la hora seleccionada del arreglo de horas disponibles
+        this.horasDisponibles = this.horasDisponibles.filter(h => h !== this.horaSeleccionada);
+        this.agendaService.setClienteId(this.clientes[0]._id);
         alert("Cita agendada con éxito");
-       // this.router.navigate(['/confirmacion-cita']);
+        // this.router.navigate(['/confirmacion-cita']);
       },
       err => {
         console.error('❌ Error al guardar la cita:', err);
