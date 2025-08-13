@@ -22,4 +22,9 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/citas/citas.component')
     .then(m => m.CitasComponent)
   },
+   {
+    path: 'admin',
+    loadComponent: () => import('./pages/admin-agenda/admin-agenda.component')
+    .then(m => m.AdminAgendaComponent)
+  },
 ];

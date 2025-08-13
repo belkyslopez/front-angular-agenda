@@ -72,6 +72,19 @@ export class AgendaComponent implements OnInit {
       this.horasDisponibles = this.horarios
         .filter(h => h.fecha === fechaISO && (h.disponible === true || !h.cita || h.estado !== 'ocupado'))
         .map(h => h.hora_inicio);
+      // ✅ Filtrar horas antiguas solo si la fecha seleccionada es hoy
+      if (this.isToday(dia)) {
+        const ahora = new Date();
+        const horaActual = ahora.getHours();
+        const minutosActual = ahora.getMinutes();
+
+        this.horasDisponibles = this.horasDisponibles.filter(hora => {
+          const [h, m] = hora.split(':').map(Number);
+          if (h > horaActual) return true;
+          if (h === horaActual && m >= minutosActual) return true;
+          return false;
+        });
+      }
       // Si no hay horarios para ese día, asegúrate de que sea un array vacío
       if (!Array.isArray(this.horasDisponibles)) {
         this.horasDisponibles = [];

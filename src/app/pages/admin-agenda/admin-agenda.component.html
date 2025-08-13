@@ -1,0 +1,35 @@
+<div class="max-w-4xl mx-auto p-6">
+  <h2 class="text-2xl font-bold mb-4 text-pink-600">Agenda del Profesional</h2>
+
+  <!-- Selector de profesional -->
+  <div class="mb-4">
+    <label class="block font-semibold mb-1">Seleccionar profesional:</label>
+    <select [(ngModel)]="profesionalSeleccionado" (change)="onProfesionalChange()" class="border rounded px-2 py-1 w-full">
+      <option *ngFor="let prof of profesionales" [ngValue]="prof">{{ prof.nombre }}</option>
+    </select>
+  </div>
+
+  <!-- Controles de mes -->
+  <div class="flex items-center justify-between mb-4">
+    <button (click)="cambiarMes(-1)" class="bg-pink-500 text-white px-3 py-1 rounded">Mes anterior</button>
+    <span class="text-lg font-semibold">
+      {{ fechaActual | date:'MMMM y' }}
+    </span>
+    <button (click)="cambiarMes(1)" class="bg-pink-500 text-white px-3 py-1 rounded">Mes siguiente</button>
+  </div>
+
+  <!-- Agenda mensual simple -->
+  <div class="grid grid-cols-7 gap-2 text-sm text-center">
+    <div class="font-bold" *ngFor="let dia of ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb']">{{ dia }}</div>
+    <ng-container *ngFor="let day of [].constructor(42)">
+      <div class="border h-20 p-1 text-left" [class.bg-pink-100]="hayCitaEnDia(day)">
+        <span class="text-xs font-semibold">{{ getDiaCalendario(day) }}</span>
+        <div class="text-[10px] mt-1" *ngFor="let cita of getCitasDelDia(day)">
+          {{ cita.hora }} -
+            <!-- {{ cita.hora }} - {{ cita.servicio.Id?.nombre }} -->
+        </div>
+      </div>
+    </ng-container>
+  </div>
+</div>
+

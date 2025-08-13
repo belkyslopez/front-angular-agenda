@@ -17,11 +17,14 @@ export class CitasComponent {
   constructor(private route: ActivatedRoute, private agendaService: AgendaService) { }
 
   ngOnInit() {
+    console.log("entro a citas");
     const usuarioId = this.route.snapshot.paramMap.get('id');
+    console.log("usuarioId en citas:", usuarioId);
     if (usuarioId) {
       this.agendaService.getCitasxUsuario(usuarioId).subscribe(data => {
         this.citas = data;
         console.log("citas:", this.citas);
+
       });
     }
   }
