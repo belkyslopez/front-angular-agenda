@@ -20,4 +20,8 @@ export class UsuarioService {
   getUsuariosxRut(usuarioRut: string): Observable<any[]> {
     return this.http.get<any[]>(`${this.apiUrl}/usuarios/${usuarioRut}`);
   }
+
+  registrar(usuario: Usuario): Observable<Usuario> {
+    return this.http.post<Usuario>(`${this.apiUrl}/usuarios`, usuario);
+  }
 }
