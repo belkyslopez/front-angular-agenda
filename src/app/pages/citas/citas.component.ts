@@ -1,9 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { AgendaService } from '../../core/services/agenda.service';
-import { DatePipe } from '@angular/common';
-import { TitleCasePipe } from '@angular/common';
-import { CommonModule } from '@angular/common';
+import { DatePipe, TitleCasePipe, CommonModule } from '@angular/common';
 @Component({
   selector: 'app-citas',
   standalone: true,

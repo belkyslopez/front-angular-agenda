@@ -1,0 +1,80 @@
+<!-- Modal -->
+<!-- <div class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50" *ngIf="mostrarModal">
+  <div class="bg-white w-full max-w-md mx-4 rounded-lg shadow-lg p-6">
+    <h2 class="text-xl font-semibold mb-4 text-center">Agregar Categoría</h2>
+    <!-- Formulario para agendar cita -->
+<!-- <form [formGroup]=" miForm" (ngSubmit)="agendarCitaAServicio()"
+      class="max-w-md mx-auto mt-8 space-y-4 p-6 bg-white rounded-xl shadow-lg">
+      <input type="text" formControlName="nombreCliente" placeholder="Tu nombre"
+        class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-400"
+        required />
+      <input type="text" formControlName="apellidoCliente" placeholder="Tu apellido"
+        class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-400"
+        required />
+      <input type="text" formControlName="correoCliente" placeholder="Tu correo"
+        class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-400"
+        required />
+      <input type="text" formControlName="claveCliente" placeholder="Tu clave"
+        class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-400"
+        required />
+      <input type="text" formControlName="telefono" placeholder="Celular"
+        class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-400"
+        required />
+      <input type="date" formControlName="fecha"
+        class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-400"
+        required />
+      <input type="time" formControlName="hora"
+        class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-400"
+        required />
+      <button type="submit"
+        class="w-full bg-pink-500 text-white py-2 rounded-xl hover:bg-pink-600 transition duration-200">
+        Agendar
+      </button>
+    </form>
+  </div>
+</div> -->
+
+<!-- Botón para abrir el modal -->
+<button class="w-full bg-pink-500 text-white py-2 rounded-xl hover:bg-pink-600 transition duration-200 mt-4" (click)="abrirModal()">
+  Registrar Usuario
+</button>
+
+<!-- Modal -->
+<div *ngIf="mostrarModal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+  <div class="bg-white p-6 rounded-xl shadow-lg w-full max-w-md relative">
+
+    <!-- Botón cerrar -->
+    <button class="absolute top-2 right-2 text-gray-500 hover:text-gray-800" (click)="cerrarModal()">✖</button>
+
+    <h2 class="text-xl font-semibold mb-4">Registro de Usuario</h2>
+
+    <form [formGroup]="miForm" (ngSubmit)="registrarUsuario()" class="space-y-4">
+
+      <!-- Campo RUT -->
+      <input type="text" formControlName="rut" placeholder="Ingrese RUT (Ej: 12.345.678-9)" maxlength="12"
+        class="w-full p-2 border border-gray-300 rounded-lg" (input)="formatearRut($event)" required />
+      <div *ngIf="miForm.get('rut')?.invalid && miForm.get('rut')?.touched" class="text-red-500 text-sm">
+        RUT inválido
+      </div>
+
+      <!-- Otros campos -->
+      <input type="text" formControlName="nombre" placeholder="Nombre"
+        class="w-full p-2 border border-gray-300 rounded-lg" required />
+      <input type="text" formControlName="apellido" placeholder="Apellido"
+        class="w-full p-2 border border-gray-300 rounded-lg" required />
+      <input type="text" formControlName="correo" placeholder="Correo"
+        class="w-full p-2 border border-gray-300 rounded-lg" required />
+      <input type="password" formControlName="clave" placeholder="Clave"
+        class="w-full p-2 border border-gray-300 rounded-lg" required />
+      <input type="text" formControlName="celular" placeholder="Celular"
+        class="w-full p-2 border border-gray-300 rounded-lg" required />
+
+      <!-- Botón -->
+      <button type="submit" [disabled]="miForm.invalid"
+        class="w-full bg-pink-500 text-white py-2 rounded-lg hover:bg-pink-600 transition">
+        Guardar
+      </button>
+
+    </form>
+  </div>
+</div>

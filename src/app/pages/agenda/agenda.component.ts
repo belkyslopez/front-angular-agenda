@@ -1,18 +1,16 @@
+import { FormularioRegistroComponent } from './../../components/formulario-registro/formulario-registro.component';
 import { Component, OnInit } from '@angular/core';
 import { AgendaService, Cita } from '../../core/services/agenda.service';
-import { ActivatedRoute } from '@angular/router';
+import { UsuarioService } from '../../core/services/usuario.service';
+import { ActivatedRoute, Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
-import { DatePipe } from '@angular/common';
-import { TitleCasePipe } from '@angular/common';
-import { ReactiveFormsModule } from '@angular/forms';
-import { CommonModule } from '@angular/common';
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, AbstractControl } from '@angular/forms';
+import { DatePipe, TitleCasePipe,CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-agenda',
   standalone: true,
-  imports: [DatePipe, TitleCasePipe, ReactiveFormsModule, CommonModule],
+  imports: [DatePipe, TitleCasePipe, ReactiveFormsModule, CommonModule, FormularioRegistroComponent],
   templateUrl: './agenda.component.html',
   styleUrl: './agenda.component.css'
 })
@@ -47,6 +45,13 @@ export class AgendaComponent implements OnInit {
   payload = {};
   horarioSeleccionado: any;
   profesionalSeleccionado: any;
+
+  rut: string = '';
+  usuarioEncontrado: any = null;
+  mostrarFormulario = false;
+  formBuscar: FormGroup;
+  mostrarRut = false;
+  busquedaRealizada = false;
 
   isPast(date: Date): boolean {
     const d = new Date(date.getFullYear(), date.getMonth(), date.getDate());
@@ -99,6 +104,7 @@ export class AgendaComponent implements OnInit {
 
   constructor(private route: ActivatedRoute,
     private agendaService: AgendaService,
+    private usuarioService: UsuarioService,
     private http: HttpClient,
     private fb: FormBuilder,
     private router: Router) {
@@ -112,6 +118,10 @@ export class AgendaComponent implements OnInit {
       hora: [''],
       servicio: ['']
     });
+
+       this.formBuscar = this.fb.group({
+      rut: ['', Validators.required],
+    });
   }
 
   ngOnInit(): void {
@@ -124,7 +134,7 @@ export class AgendaComponent implements OnInit {
       });
     }
     // Obtener usuarios (clientes y profesionales)
-    this.agendaService.getUsuarios().subscribe(data => {
+    this.usuarioService.getUsuarios().subscribe(data => {
       console.log("data: get usuarios", data);
       this.clientes = data.filter(usuario => usuario.rol === 'cliente');
       this.profesionales = data.filter(usuario => usuario.rol === 'profesional');
@@ -197,8 +207,8 @@ export class AgendaComponent implements OnInit {
   }
 
   agendarCitaAServicio() {
-    console.log("agendarCitaAServicio...");
-    // Validación del formulario
+    console.log("entró aagendarCitaAServicio...");
+  //  Validación del formulario
     if (this.miForm.invalid || !this.horaSeleccionada || !this.clientes[0] || !this.profesionales[0] || !this.servicio?._id) {
       alert("Faltan datos para agendar la cita. Verifica el cliente, profesional y servicio. y/o selecciona una hora.");
       this.miForm.markAllAsTouched();
@@ -230,4 +240,53 @@ export class AgendaComponent implements OnInit {
       }
     );
   }
+
+    buscarUsuario() {
+    console.log('entro a buscarUsuario');
+    const rutFormateado = this.formBuscar.get('rut')?.value
+    ?.replace(/\./g, '')  // quita puntos
+    ?.replace(/-/g, '');  // quita guion
+    console.log('buscarUsuario: rut', rutFormateado);
+    if (!rutFormateado) return;
+
+    this.usuarioService.getUsuariosxRut(rutFormateado).subscribe({
+      next: (res: any) => {
+        console.log('buscarUsuario: get usuariosxRut', res);
+        this.usuarioEncontrado = res || null;
+        console.log(' usuarioEncontrado', this.usuarioEncontrado);
+        this.busquedaRealizada = true;
+      },
+      error: () => {
+        this.usuarioEncontrado = null;
+        this.busquedaRealizada  = true;
+      }
+    });
+  }
+
+    formatearRut(event: any) {
+      let valor = event.target.value.replace(/\./g, '').replace(/-/g, '').toUpperCase();
+      if (valor.length > 1) {
+        valor = valor.slice(0, -1).replace(/\B(?=(\d{3})+(?!\d))/g, ".") + '-' + valor.slice(-1);
+      }
+      event.target.value = valor;
+      this.formBuscar.get('rut')?.setValue(valor, { emitEvent: false });
+    }
+
+    validarRut(control: AbstractControl) {
+      const rut = control.value?.replace(/\./g, '').replace(/-/g, '');
+      if (!rut || rut.length < 8) return { rutInvalido: true };
+
+      const cuerpo = rut.slice(0, -1);
+      let dv = rut.slice(-1).toUpperCase();
+
+      let suma = 0, multiplo = 2;
+      for (let i = cuerpo.length - 1; i >= 0; i--) {
+        suma += parseInt(cuerpo[i]) * multiplo;
+        multiplo = multiplo < 7 ? multiplo + 1 : 2;
+      }
+      const dvEsperado = 11 - (suma % 11);
+      let dvFinal = dvEsperado === 11 ? '0' : dvEsperado === 10 ? 'K' : dvEsperado.toString();
+
+      return dvFinal === dv ? null : { rutInvalido: true };
+    }
 }

@@ -1,9 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
+import { Router , ActivatedRoute} from '@angular/router';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { ServiciosService } from '../../core/services/servicios.service';
-import { ActivatedRoute } from '@angular/router';
 import { FormularioServicioComponent } from '../../components/formulario-servicio/formulario-servicio.component';
 import { CategoriasService } from '../../core/services/categorias.service';
 import { AgendaService } from '../../core/services/agenda.service';

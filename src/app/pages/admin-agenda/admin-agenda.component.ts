@@ -1,12 +1,11 @@
 import { Component, OnInit } from '@angular/core';
 import { AgendaService } from '../../core/services/agenda.service';
+import { AdminService } from '../../core/services/admin.service';
+import { UsuarioService } from '../../core/services/usuario.service';
 import { Cita } from '../../core/interfaces/cita';
 import { Usuario } from '../../core/interfaces/usuario';
-import { AdminService } from '../../core/services/admin.service';
-import { DatePipe } from '@angular/common';
-import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule } from '@angular/forms';
-import { FormsModule } from '@angular/forms';
+import { DatePipe, CommonModule } from '@angular/common';
+import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-admin-agenda',
@@ -25,10 +24,11 @@ export class AdminAgendaComponent implements OnInit {
   calendarioDias: { fecha: Date, citas: any[] }[] = [];
 
   constructor(private agendaService: AgendaService,
-    private adminService: AdminService) { }
+    private adminService: AdminService,
+    private usuarioService: UsuarioService) { }
 
   ngOnInit(): void {
-    this.agendaService.getUsuarios().subscribe(usuarios => {
+    this.usuarioService.getUsuarios().subscribe(usuarios => {
       this.profesionales = usuarios.filter(u => u.rol === 'profesional');
       console.log('Profesionales:', this.profesionales);
       if (this.profesionales.length > 0) {

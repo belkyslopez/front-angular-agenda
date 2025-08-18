@@ -55,13 +55,55 @@
       <p class="text-sm text-red-500">No hay horas disponibles para esta fecha.</p>
     </ng-template>
   </div>
-  <button *ngIf="horaSeleccionada && !citaAgendada" type="submit"
+  <!-- <button *ngIf="horaSeleccionada && !citaAgendada" type="submit"
     class="w-full bg-pink-500 text-white py-2 rounded-xl hover:bg-pink-600 transition duration-200 mt-4"
     (click)="agendarCitaAServicio()">
-    Agendar
-  </button>
+    Validar cliente
+  </button> -->
 </div>
 
+<!----------------------------------------------   Verificar rut Cliente ------------------------------------------------------------->
+
+<div *ngIf="horaSeleccionada && !citaAgendada" class="max-w-md mx-auto mt-6 bg-white p-6 rounded-lg shadow-md">
+  <h2 class="text-lg font-bold mb-4">Ingrese su  RUT para validar que esté registrado</h2>
+  <!-- Input para ingresar RUT -->
+  <form [formGroup]="formBuscar" (ngSubmit)="buscarUsuario()" class="space-y-4">
+    <div class="flex gap-2 mb-4">
+      <input type="text" formControlName="rut" placeholder="Ingrese RUT" class="flex-1 p-2 border rounded"
+        (input)="formatearRut($event)">
+      <div *ngIf="formBuscar.get('rut')?.invalid && formBuscar.get('rut')?.touched" class="text-red-500 text-sm">
+        RUT inválido
+      </div>
+      <button (click)="buscarUsuario()" class="bg-pink-500 text-white px-4 py-2 rounded hover:bg-pink-600">
+        Buscar
+      </button>
+    </div>
+  </form>
+
+  <!-- Si el usuario existe -->
+  <div *ngIf="usuarioEncontrado">
+    <p class="text-green-600 font-semibold">Cliente encontrado:</p>
+    <p>Nombre: {{ usuarioEncontrado.nombre }}</p>
+    <p>Apellido: {{ usuarioEncontrado.apellido }}</p>
+    <p>Correo: {{ usuarioEncontrado.correo }}</p>
+    <p>Telefono: {{ usuarioEncontrado.telefono }}</p>
+    <p>Rut: {{ usuarioEncontrado.rut }}</p>
+    <button type="submit"
+      class="w-full bg-pink-500 text-white py-2 rounded-xl hover:bg-pink-600 transition duration-200 mt-4"
+      (click)="agendarCitaAServicio()"> Agendar
+    </button>
+  </div>
+
+  <!-- Si no existe, mostrar solo después de buscar -->
+  <div *ngIf="busquedaRealizada && !usuarioEncontrado">
+    <p class="text-red-600 font-semibold mb-2">
+      No se encontró el cliente con el RUT ingresado.
+    </p>
+    <app-formulario-registro></app-formulario-registro>
+  </div>
+</div>
+
+<!------------------------------------------------- Agendada la cita ------------------------------------------------------------------>
 <!--Servicio seleccionado-->
 <div *ngIf="citaAgendada" class="max-w-md mx-auto bg-white shadow-lg rounded-2xl p-6 border">
   <h2 class="text-xl font-bold text-gray-800 mb-4">{{servicio.nombre}}</h2>
@@ -82,77 +124,5 @@
     <p><span class="font-semibold">Apellido: </span> {{clientes[0].apellido }}</p>
     <p><span class="font-semibold">Email: </span> {{clientes[0].correo}}</p>
     <p><span class="font-semibold">Teléfono: </span> {{clientes[0].telefono}} </p>
-  </div>
-</div>
-
-<!-- Formulario para agendar cita -->
-<!-- <form
-  [formGroup]="miForm"
-  (ngSubmit)="agendarCitaAServicio()"
-  class="max-w-md mx-auto mt-8 space-y-4 p-6 bg-white rounded-xl shadow-lg"
->
-  <input
-    type="text"
-    formControlName="nombreCliente"
-    placeholder="Tu nombre"
-    class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-400"
-    required
-  />
-   <input
-    type="text"
-    formControlName="apellidoCliente"
-    placeholder="Tu apellido"
-    class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-400"
-    required
-  />
-   <input
-    type="text"
-    formControlName="correoCliente"
-    placeholder="Tu correo"
-    class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-400"
-    required
-  />
-     <input
-    type="text"
-    formControlName="claveCliente"
-    placeholder="Tu clave"
-    class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-400"
-    required
-  />
-  <input
-    type="text"
-    formControlName="telefono"
-    placeholder="Celular"
-    class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-400"
-    required
-  />
-  <input
-    type="date"
-    formControlName="fecha"
-    class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-400"
-    required
-  />
-  <input
-    type="time"
-    formControlName="hora"
-    class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-400"
-    required
-  />
-  <button type="submit" class="w-full bg-pink-500 text-white py-2 rounded-xl hover:bg-pink-600 transition duration-200"
-  >
-    Agendar
-  </button>
-</form> -->
-
-<!-- Lista de citas -->
-<div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 px-4 mt-10">
-  <div *ngFor="let cita of citas"
-    class="bg-white rounded-2xl shadow-md p-4 border hover:shadow-lg transition duration-200">
-    <h2 class="text-xl font-bold text-pink-600 mb-1 text-center">
-      {{ cita.titulo }}
-    </h2>
-    <p class="text-center text-gray-600">
-      {{ cita.fecha | date: 'shortDate'}} a las {{ cita.hora | date: 'HH:mm' }}
-    </p>
   </div>
 </div>

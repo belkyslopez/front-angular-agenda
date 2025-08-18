@@ -26,5 +26,5 @@ export const routes: Routes = [
     path: 'admin',
     loadComponent: () => import('./pages/admin-agenda/admin-agenda.component')
     .then(m => m.AdminAgendaComponent)
-  },
+  }
 ];

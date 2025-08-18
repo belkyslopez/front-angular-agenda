@@ -1,7 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { Usuario } from '../interfaces/usuario';
 
 export interface Cita {
   _id?: string; // MongoDB genera este campo automáticamente
@@ -71,10 +70,6 @@ export class AgendaService {
   getHorariosDisponibles(fecha: string, profesionalId: string): Observable<any[]> {
   return this.http.get<any[]>(`http://localhost:3000/api/horarios/disponibles/${fecha}/${profesionalId}`);
 }
-
-  getUsuarios(): Observable<any[]> {
-    return this.http.get<any[]>(`http://localhost:3000/api/usuarios`);
-  }
 
   setClienteId(clienteId: any) {
     this.clienteId = clienteId;
