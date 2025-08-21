@@ -1,7 +1,7 @@
 <!-- Lista de todas las citas -->
 <div *ngIf="citas.length > 0; else sinCitas" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 p-4">
   <div *ngFor="let cita of citas" class="bg-white p-6 rounded-xl shadow-md">
-    <h2 class="text-xl font-bold text-pink-600 mb-2">Detalle de Cita</h2>
+    <h2 class="text-xl font-bold text-pink-600 mb-2">Detalle de la Cita</h2>
     <p><strong>Fecha:</strong> {{ cita.fecha | date }}</p>
     <p><strong>Hora:</strong> {{ cita.hora }}</p>
     <p><strong>Cliente:</strong> {{ cita.usuario_ID?.nombre | titlecase }}</p>
@@ -13,4 +13,3 @@
 <ng-template #sinCitas>
   <p class="text-center text-gray-500 mt-4">No hay citas para mostrar.</p>
 </ng-template>
-

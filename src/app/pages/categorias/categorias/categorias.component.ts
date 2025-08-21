@@ -88,8 +88,4 @@ export class CategoriasComponent implements OnInit {
       });
     }
   }
-
-  // onImageError(event: any) {
-  //   event.target.src = 'assets/default.jpeg';
-  // }
 }

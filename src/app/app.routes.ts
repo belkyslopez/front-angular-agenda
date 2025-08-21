@@ -18,7 +18,7 @@ export const routes: Routes = [
       .then(m => m.AgendaComponent)
   },
   {
-    path: 'citas',
+    path: 'cita/:id',
     loadComponent: () => import('./pages/citas/citas.component')
     .then(m => m.CitasComponent)
   },

@@ -9,6 +9,7 @@ import { Observable } from 'rxjs';
 export class UsuarioService {
 
   usuarioRut: string = '';
+  usuarioNuevo: any;
   private apiUrl = 'http://localhost:3000/api'; // Ruta del backend Node.jsF
 
   constructor(private http: HttpClient) { }
@@ -17,11 +18,22 @@ export class UsuarioService {
     return this.http.get<any[]>(`${this.apiUrl}/usuarios`);
   }
 
-  getUsuariosxRut(usuarioRut: string): Observable<any[]> {
-    return this.http.get<any[]>(`${this.apiUrl}/usuarios/${usuarioRut}`);
+  getUsuariosxRut(rut: string): any {
+    const body = {
+      "rut": rut
+    };
+    return this.http.post(`${this.apiUrl}/usuarios/buscar`, body);
   }
 
   registrar(usuario: Usuario): Observable<Usuario> {
     return this.http.post<Usuario>(`${this.apiUrl}/usuarios`, usuario);
+  }
+
+  setUsuarioNuevo(Usuario: any) {
+    this.usuarioNuevo = Usuario;
+  }
+
+  getUsuarioNuevo() {
+    return this.usuarioNuevo;
   }
 }

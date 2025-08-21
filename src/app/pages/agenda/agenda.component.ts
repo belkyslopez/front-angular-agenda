@@ -1,20 +1,22 @@
 import { FormularioRegistroComponent } from './../../components/formulario-registro/formulario-registro.component';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
 import { AgendaService, Cita } from '../../core/services/agenda.service';
 import { UsuarioService } from '../../core/services/usuario.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
-import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, AbstractControl } from '@angular/forms';
-import { DatePipe, TitleCasePipe,CommonModule } from '@angular/common';
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, AbstractControl, FormsModule } from '@angular/forms';
+import { DatePipe, TitleCasePipe, CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-agenda',
   standalone: true,
-  imports: [DatePipe, TitleCasePipe, ReactiveFormsModule, CommonModule, FormularioRegistroComponent],
+  imports: [DatePipe, TitleCasePipe, ReactiveFormsModule, CommonModule, FormularioRegistroComponent, FormsModule],
   templateUrl: './agenda.component.html',
   styleUrl: './agenda.component.css'
 })
 export class AgendaComponent implements OnInit {
+
+  @Input() nuevoUsuario: any = {};
   // Para pintar el nombre del día
   dayNames = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
   today = new Date();
@@ -26,7 +28,7 @@ export class AgendaComponent implements OnInit {
   cliente: any = null;
   profesionales: any[] = [];
   fecha = '2025-07-31';
-  miForm: FormGroup;
+  formularioCita: FormGroup;
   servicioNombre: string = '';
   servicioId: string = '';
   citas: any[] = [];
@@ -41,7 +43,6 @@ export class AgendaComponent implements OnInit {
   };
   horaSeleccionada: string | null = null;
   horaAgendada: string | null = null;
-  citaAgendada = false;
   payload = {};
   horarioSeleccionado: any;
   profesionalSeleccionado: any;
@@ -52,6 +53,8 @@ export class AgendaComponent implements OnInit {
   formBuscar: FormGroup;
   mostrarRut = false;
   busquedaRealizada = false;
+  usuarioNuevo: any = {};
+  mostrarBusquedaRut = false
 
   isPast(date: Date): boolean {
     const d = new Date(date.getFullYear(), date.getMonth(), date.getDate());
@@ -69,7 +72,7 @@ export class AgendaComponent implements OnInit {
     if (this.isPast(dia)) return;
     this.fechaSeleccionada = dia;
     const fechaISO = dia.toISOString().split('T')[0];
-    this.miForm.get('fecha')?.setValue(fechaISO); // actualiza el form
+    this.formularioCita.get('fecha')?.setValue(fechaISO); // actualiza el form
     // Llamar al backend para obtener horarios del día seleccionado
     this.agendaService.getHorarios(fechaISO).subscribe(data => {
       this.horarios = Array.isArray(data) ? data : [];
@@ -105,21 +108,18 @@ export class AgendaComponent implements OnInit {
   constructor(private route: ActivatedRoute,
     private agendaService: AgendaService,
     private usuarioService: UsuarioService,
-    private http: HttpClient,
     private fb: FormBuilder,
     private router: Router) {
-    this.miForm = this.fb.group({
-      nombreCliente: [''],
-      apellidoCliente: [''],
-      correoCliente: [''],
-      claveCliente: [''],
-      telefono: ['', Validators.pattern(/^\d{9}$/)],
+
+    this.formularioCita = this.fb.group({
+      servicio_ID: [''],
+      usuario_ID: [''],
+      profesional_ID: [''],
       fecha: [''],
-      hora: [''],
-      servicio: ['']
+      hora: ['']
     });
 
-       this.formBuscar = this.fb.group({
+    this.formBuscar = this.fb.group({
       rut: ['', Validators.required],
     });
   }
@@ -129,38 +129,17 @@ export class AgendaComponent implements OnInit {
     this.servicio = this.agendaService.consultarServicio();
     // Si tienes el servicio, precargar el campo
     if (this.servicio) {
-      this.miForm.patchValue({
-        servicio: this.servicio._id
+      this.formularioCita.patchValue({
+        servicio_ID: this.servicio._id
       });
     }
     // Obtener usuarios (clientes y profesionales)
     this.usuarioService.getUsuarios().subscribe(data => {
       console.log("data: get usuarios", data);
-      this.clientes = data.filter(usuario => usuario.rol === 'cliente');
+      // this.clientes = data.filter(usuario => usuario.rol === 'cliente');
       this.profesionales = data.filter(usuario => usuario.rol === 'profesional');
-      console.log("cliente:", this.clientes);
+      // console.log("cliente:", this.clientes);
       console.log("profesional:", this.profesionales);
-      // Selecciona automáticamente el primer profesional y cliente
-      if (this.profesionales.length > 0) {
-        this.profesionalSeleccionado = this.profesionales[0];
-        // Ahora que tienes profesional y fecha, puedes cargar los horarios
-        const fechaISO = this.fechaSeleccionada?.toISOString().split('T')[0]; // Asegúrate de tener fechaSeleccionada definida
-        if (fechaISO) {
-          this.agendaService.getHorariosDisponibles(fechaISO, this.profesionalSeleccionado._id).subscribe(horarios => {
-            this.horasDisponibles = horarios.map(h => h.hora_inicio);
-            console.log("Horas disponibles:", this.horasDisponibles);
-          });
-        }
-      }
-      if (this.clientes.length > 0) {
-        const cliente = this.clientes[0];
-        this.miForm.patchValue({
-          nombreCliente: cliente.nombre,
-          apellidoCliente: cliente.apellido,
-          correoCliente: cliente.correo,
-          telefono: cliente.telefono
-        });
-      }
     });
   }
 
@@ -173,7 +152,7 @@ export class AgendaComponent implements OnInit {
 
   seleccionarHora(hora: string): void {
     this.horaSeleccionada = hora;
-    this.miForm.get('hora')?.setValue(hora);
+    this.formularioCita.get('hora')?.setValue(hora);
     console.log('Hora seleccionada:', hora);
     this.horarioSeleccionado = this.horaSeleccionada;
   }
@@ -208,85 +187,98 @@ export class AgendaComponent implements OnInit {
 
   agendarCitaAServicio() {
     console.log("entró aagendarCitaAServicio...");
-  //  Validación del formulario
-    if (this.miForm.invalid || !this.horaSeleccionada || !this.clientes[0] || !this.profesionales[0] || !this.servicio?._id) {
-      alert("Faltan datos para agendar la cita. Verifica el cliente, profesional y servicio. y/o selecciona una hora.");
-      this.miForm.markAllAsTouched();
-      return;
-    }
-    const payload = {
-      usuario_ID: this.clientes[0]._id,
-      profesional_ID: this.profesionales[0]._id,
-      servicio_ID: this.servicio._id,
-      fecha: this.miForm.get('fecha')?.value,
-      hora: this.miForm.get('hora')?.value
-    };
-    this.agendaService.agregarCitaAServicio(payload).subscribe(
-      res => {
-        console.log('✅ Cita guardada:', res);
-        this.horaAgendada = payload.hora;
-        this.citaAgendada = true;
-        // Recargar horarios disponibles
-        this.seleccionarDia(new Date(payload.fecha));
-        // Quitar la hora seleccionada del arreglo de horas disponibles
-        this.horasDisponibles = this.horasDisponibles.filter(h => h !== this.horaSeleccionada);
-        this.agendaService.setClienteId(this.clientes[0]._id);
-        alert("Cita agendada con éxito");
-        // this.router.navigate(['/confirmacion-cita']);
+    console.log("this.formularioCita.value:", this.formularioCita.value);
+    const unid = this.formularioCita.get('usuario_ID')?.value;
+    console.log('id usuario:', unid);
+    this.agendaService.agregarCita(this.formularioCita.value).subscribe({
+      next: (response) => {
+        alert('Cita registrada');
+        this.formularioCita.reset();
+        console.log('Respuesta de la API al agendar cita:', response);
       },
-      err => {
-        console.error('❌ Error al guardar la cita:', err);
-        alert("Hubo un error al agendar la cita. Intenta nuevamente.");
-      }
-    );
+      error: () => alert('Error al registrar')
+    });
+    this.router.navigate(['/cita', unid]);
   }
 
-    buscarUsuario() {
-    console.log('entro a buscarUsuario');
+  buscarUsuario() {
     const rutFormateado = this.formBuscar.get('rut')?.value
-    ?.replace(/\./g, '')  // quita puntos
-    ?.replace(/-/g, '');  // quita guion
-    console.log('buscarUsuario: rut', rutFormateado);
+      ?.replace(/\./g, '')  // quita puntos
+      ?.replace(/-/g, '');  // quita guion
     if (!rutFormateado) return;
 
     this.usuarioService.getUsuariosxRut(rutFormateado).subscribe({
       next: (res: any) => {
-        console.log('buscarUsuario: get usuariosxRut', res);
-        this.usuarioEncontrado = res || null;
-        console.log(' usuarioEncontrado', this.usuarioEncontrado);
+        const respuesta = res;
+        this.usuarioEncontrado = respuesta.usuarioEncontrado || null;
+        if (this.usuarioEncontrado) {
+          this.formularioCita.patchValue({
+            usuario_ID: this.usuarioEncontrado._id
+          });
+        }
         this.busquedaRealizada = true;
       },
       error: () => {
         this.usuarioEncontrado = null;
-        this.busquedaRealizada  = true;
+        this.busquedaRealizada = true;
       }
     });
   }
 
-    formatearRut(event: any) {
-      let valor = event.target.value.replace(/\./g, '').replace(/-/g, '').toUpperCase();
-      if (valor.length > 1) {
-        valor = valor.slice(0, -1).replace(/\B(?=(\d{3})+(?!\d))/g, ".") + '-' + valor.slice(-1);
-      }
-      event.target.value = valor;
-      this.formBuscar.get('rut')?.setValue(valor, { emitEvent: false });
+  formatearRut(event: any) {
+    let valor = event.target.value.replace(/\./g, '').replace(/-/g, '').toUpperCase();
+    if (valor.length > 1) {
+      valor = valor.slice(0, -1).replace(/\B(?=(\d{3})+(?!\d))/g, ".") + '-' + valor.slice(-1);
     }
+    event.target.value = valor;
+    this.formBuscar.get('rut')?.setValue(valor, { emitEvent: false });
+  }
 
-    validarRut(control: AbstractControl) {
-      const rut = control.value?.replace(/\./g, '').replace(/-/g, '');
-      if (!rut || rut.length < 8) return { rutInvalido: true };
+  validarRut(control: AbstractControl) {
+    const rut = control.value?.replace(/\./g, '').replace(/-/g, '');
+    if (!rut || rut.length < 8) return { rutInvalido: true };
 
-      const cuerpo = rut.slice(0, -1);
-      let dv = rut.slice(-1).toUpperCase();
+    const cuerpo = rut.slice(0, -1);
+    let dv = rut.slice(-1).toUpperCase();
 
-      let suma = 0, multiplo = 2;
-      for (let i = cuerpo.length - 1; i >= 0; i--) {
-        suma += parseInt(cuerpo[i]) * multiplo;
-        multiplo = multiplo < 7 ? multiplo + 1 : 2;
-      }
-      const dvEsperado = 11 - (suma % 11);
-      let dvFinal = dvEsperado === 11 ? '0' : dvEsperado === 10 ? 'K' : dvEsperado.toString();
-
-      return dvFinal === dv ? null : { rutInvalido: true };
+    let suma = 0, multiplo = 2;
+    for (let i = cuerpo.length - 1; i >= 0; i--) {
+      suma += parseInt(cuerpo[i]) * multiplo;
+      multiplo = multiplo < 7 ? multiplo + 1 : 2;
     }
+    const dvEsperado = 11 - (suma % 11);
+    let dvFinal = dvEsperado === 11 ? '0' : dvEsperado === 10 ? 'K' : dvEsperado.toString();
+
+    return dvFinal === dv ? null : { rutInvalido: true };
+  }
+
+  seleccionarProfesional() {
+    console.log('seleccionarProfesional');
+    console.log('profesionalSeleccionado', this.profesionalSeleccionado);
+
+    this.formularioCita.patchValue({
+      profesional_ID: this.profesionalSeleccionado._id
+    });
+    // Ahora que tienes profesional y fecha, puedes cargar los horarios
+    const fechaISO = this.fechaSeleccionada?.toISOString().split('T')[0]; // Asegúrate de tener fechaSeleccionada definida
+    if (fechaISO) {
+      this.agendaService.getHorariosDisponibles(fechaISO, this.profesionalSeleccionado._id).subscribe(horarios => {
+        this.horasDisponibles = horarios.map(h => h.hora_inicio);
+        console.log("Horas disponibles:", this.horasDisponibles);
+      });
+
+    }
+  }
+
+  recibirMensaje() {
+    const co = this.usuarioService.getUsuarioNuevo();
+    console.log('recibirMensaje', co);
+
+    if (co) {
+      this.usuarioEncontrado = co.nuevoUsuario;
+      this.formularioCita.patchValue({
+        usuario_ID: this.usuarioEncontrado._id
+      });
+    }
+  }
 }

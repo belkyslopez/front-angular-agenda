@@ -3,10 +3,47 @@
   Agendar cita para: {{ servicio.nombre | titlecase }}
 </h2>
 
+<!-- Selector de profesional -->
+<!-- <div class="mb-4">
+    <label class="block font-semibold mb-1">Seleccionar profesional:</label>
+    <select [(ngModel)]="profesionalSeleccionado" (change)="seleccionarProfesional()" class="border rounded px-2 py-1 w-full">
+      <option *ngFor="let prof of profesionales" [ngValue]="prof">{{ prof.nombre }}</option>
+    </select>
+  </div> -->
+
+<!-- Selector de profesional con ícono -->
+<div class="mb-4 sm:mb-6 md:mb-8 lg:mb-10" class="max-w-md mx-auto mt-6 bg-white p-6 rounded-lg shadow-md">
+  <label class="block text-gray-700 font-medium mb-2">
+    Seleccionar profesional:
+  </label>
+
+  <div class="relative">
+    <!-- Ícono dentro del select -->
+    <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
+      <!-- Heroicon o Lucide (ejemplo de usuario) -->
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"
+        class="w-5 h-5">
+        <path stroke-linecap="round" stroke-linejoin="round"
+          d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.5 20.25a8.25 8.25 0 1115 0v.75H4.5v-.75z" />
+      </svg>
+    </span>
+
+    <select [(ngModel)]="profesionalSeleccionado" (change)="seleccionarProfesional()"
+      class="w-full rounded-xl border border-gray-300 bg-white pl-10 pr-4 py-2  p-[50px]  shadow-sm
+             focus:border-pink-500 focus:ring-2 focus:ring-pink-300 focus:outline-none text-gray-700 appearance-none transition">
+      <option disabled selected value="">-- Seleccione un profesional --</option>
+      <option *ngFor="let prof of profesionales" [ngValue]="prof">
+        {{ prof.nombre }}
+      </option>
+    </select>
+  </div>
+</div>
+
+
 <!-- Profesional -->
-<h4 *ngIf="profesionales.length  > 0" class="text-2xl font-bold text-pink-600 text-center mt-6">
+<!-- <h4 *ngIf="profesionales.length  > 0" class="text-2xl font-bold text-pink-600 text-center mt-6">
   {{ profesionales[0].nombre | titlecase }}
-</h4>
+</h4> -->
 
 <!-- Navegación de semana -->
 <div class="flex justify-between items-center max-w-md mx-auto mt-6 px-4">
@@ -42,8 +79,7 @@
     <div *ngIf="horasDisponibles.length > 0; else sinHoras">
       <ul class="space-y-1">
         <li *ngFor="let hora of horasDisponibles" (click)="hora !== horaAgendada && seleccionarHora(hora)"
-          [class.bg-gray-300]="hora === horaAgendada"
-          [class.text-gray-400]="hora === horaAgendada"
+          [class.bg-gray-300]="hora === horaAgendada" [class.text-gray-400]="hora === horaAgendada"
           [class.cursor-not-allowed]="hora === horaAgendada"
           [class.bg-pink-300]="hora === horaSeleccionada && hora !== horaAgendada"
           class="px-4 py-2 bg-gray-100 rounded transition">
@@ -64,24 +100,27 @@
 
 <!----------------------------------------------   Verificar rut Cliente ------------------------------------------------------------->
 
-<div *ngIf="horaSeleccionada && !citaAgendada" class="max-w-md mx-auto mt-6 bg-white p-6 rounded-lg shadow-md">
-  <h2 class="text-lg font-bold mb-4">Ingrese su  RUT para validar que esté registrado</h2>
-  <!-- Input para ingresar RUT -->
-  <form [formGroup]="formBuscar" (ngSubmit)="buscarUsuario()" class="space-y-4">
-    <div class="flex gap-2 mb-4">
-      <input type="text" formControlName="rut" placeholder="Ingrese RUT" class="flex-1 p-2 border rounded"
-        (input)="formatearRut($event)">
-      <div *ngIf="formBuscar.get('rut')?.invalid && formBuscar.get('rut')?.touched" class="text-red-500 text-sm">
-        RUT inválido
+<div  >
+<div *ngIf="horaSeleccionada && usuarioEncontrado == null" class="max-w-md mx-auto mt-6 bg-white p-6 rounded-lg shadow-md">
+      <h2 class="text-lg font-bold mb-4">Ingrese su RUT para validar que esté registrado</h2>
+    <!-- Input para ingresar RUT -->
+    <form [formGroup]="formBuscar" (ngSubmit)="buscarUsuario()" class="space-y-4">
+      <div class="flex gap-2 mb-4">
+        <input type="text" formControlName="rut" placeholder="Ingrese RUT" class="flex-1 p-2 border rounded"
+          (input)="formatearRut($event)">
+        <div *ngIf="formBuscar.get('rut')?.invalid && formBuscar.get('rut')?.touched" class="text-red-500 text-sm">
+          RUT inválido
+        </div>
+        <button type="submit" (click)="buscarUsuario()"
+          class="w-full bg-pink-500 text-white py-2 rounded-xl hover:bg-pink-600 transition duration-200 mt-4">
+          Buscar
+        </button>
       </div>
-      <button (click)="buscarUsuario()" class="bg-pink-500 text-white px-4 py-2 rounded hover:bg-pink-600">
-        Buscar
-      </button>
-    </div>
-  </form>
+    </form>
+</div>
 
   <!-- Si el usuario existe -->
-  <div *ngIf="usuarioEncontrado">
+  <div *ngIf="usuarioEncontrado" class="max-w-md mx-auto mt-6 bg-white p-6 rounded-lg shadow-md">
     <p class="text-green-600 font-semibold">Cliente encontrado:</p>
     <p>Nombre: {{ usuarioEncontrado.nombre }}</p>
     <p>Apellido: {{ usuarioEncontrado.apellido }}</p>
@@ -95,17 +134,18 @@
   </div>
 
   <!-- Si no existe, mostrar solo después de buscar -->
-  <div *ngIf="busquedaRealizada && !usuarioEncontrado">
+    <div *ngIf="busquedaRealizada && (!usuarioEncontrado)" class="max-w-md mx-auto mt-6 bg-white p-6 rounded-lg shadow-md">
+  <!-- <div *ngIf="busquedaRealizada && (!usuarioEncontrado || usuarioEncontrado.msg)"> -->
     <p class="text-red-600 font-semibold mb-2">
       No se encontró el cliente con el RUT ingresado.
     </p>
-    <app-formulario-registro></app-formulario-registro>
+    <app-formulario-registro (mensajeAlPadre)="recibirMensaje()"></app-formulario-registro>
   </div>
 </div>
 
 <!------------------------------------------------- Agendada la cita ------------------------------------------------------------------>
 <!--Servicio seleccionado-->
-<div *ngIf="citaAgendada" class="max-w-md mx-auto bg-white shadow-lg rounded-2xl p-6 border">
+<!-- <div *ngIf="citaAgendada" class="max-w-md mx-auto bg-white shadow-lg rounded-2xl p-6 border">
   <h2 class="text-xl font-bold text-gray-800 mb-4">{{servicio.nombre}}</h2>
   <div class="space-y-2 text-sm text-gray-600">
     <p *ngIf="horarios.length"><span class="font-semibold">Fecha:</span> {{horarios[0].fecha}}</p>
@@ -113,10 +153,10 @@
     <p *ngIf="profesionales.length"><span class="font-semibold">Profesional:</span> {{profesionales[0].nombre}}</p>
     <p><span class="font-semibold">Precio: $</span> {{servicio.precio}}</p>
   </div>
-</div>
+</div> -->
 
 <!-- datos de contacto -->
-<div *ngIf="citaAgendada &&clientes.length > 0"
+<!-- <div *ngIf="citaAgendada &&clientes.length > 0"
   class="max-w-md mx-auto bg-white shadow-md rounded-2xl p-6 border border-gray-200">
   <h2 class="text-xl font-bold text-gray-800 mb-4">Información del Cliente</h2>
   <div class="space-y-2 text-sm text-gray-700">
@@ -125,4 +165,4 @@
     <p><span class="font-semibold">Email: </span> {{clientes[0].correo}}</p>
     <p><span class="font-semibold">Teléfono: </span> {{clientes[0].telefono}} </p>
   </div>
-</div>
+</div> -->

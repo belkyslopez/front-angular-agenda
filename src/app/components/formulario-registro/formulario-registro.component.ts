@@ -1,7 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit , Input, Output, EventEmitter} from '@angular/core';
 import { FormBuilder, FormGroup, Validators, AbstractControl, ReactiveFormsModule, ValidationErrors } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { UsuarioService } from '../../core/services/usuario.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-formulario-registro',
@@ -15,19 +16,21 @@ export class FormularioRegistroComponent {
   miForm!: FormGroup;
   mostrarModal = false;
   payload = {};
+  @Output() mensajeAlPadre = new EventEmitter<boolean>();
 
   constructor(private fb: FormBuilder,
-    private usuarioService: UsuarioService
+    private usuarioService: UsuarioService,
+        private router: Router,
   ) { }
 
   ngOnInit() {
     this.miForm = this.fb.group({
       rut: ['', [Validators.required, this.validarRut.bind(this)]],
-      nombre: ['', Validators.required],
-      apellido: ['', Validators.required],
-      correo: ['', Validators.required],
-      clave: ['', Validators.required],
-      celular: ['', Validators.required],
+      nombre: ['arturo', Validators.required],
+      apellido: ['flores', Validators.required],
+      correo: ['af@gmail.com', Validators.required],
+      clave: ['1234', Validators.required],
+      celular: ['934067530', Validators.required],
     });
   }
 
@@ -57,10 +60,14 @@ export class FormularioRegistroComponent {
     };
 
     this.usuarioService.registrar(payload).subscribe({
-      next: () => {
+      next: (response) => {
         alert('Usuario registrado');
+         console.log('Respuesta de la API:', response);
         console.log('Usuario registrado:', this.miForm.value);
         this.miForm.reset();
+        this.usuarioService.setUsuarioNuevo(response);
+        this.notificarAlPadre();
+        // this.router.navigate(['/citas',]);
         this.cerrarModal();
       },
       error: () => alert('Error al registrar')
@@ -93,6 +100,8 @@ export class FormularioRegistroComponent {
 
     return dvFinal === dv ? null : { rutInvalido: true };
   }
-
+  notificarAlPadre() {
+    this.mensajeAlPadre.emit(true);
+  }
 
 }

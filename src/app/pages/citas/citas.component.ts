@@ -21,8 +21,6 @@ export class CitasComponent {
     if (usuarioId) {
       this.agendaService.getCitasxUsuario(usuarioId).subscribe(data => {
         this.citas = data;
-        console.log("citas:", this.citas);
-
       });
     }
   }
