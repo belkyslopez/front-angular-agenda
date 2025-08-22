@@ -1,11 +1,11 @@
 import { Component, OnInit } from '@angular/core';
 import { AgendaService } from '../../core/services/agenda.service';
-import { AdminService } from '../../core/services/admin.service';
 import { UsuarioService } from '../../core/services/usuario.service';
 import { Cita } from '../../core/interfaces/cita';
 import { Usuario } from '../../core/interfaces/usuario';
 import { DatePipe, CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
+import { CitasService } from '../../core/services/citas.service';
 
 @Component({
   selector: 'app-admin-agenda',
@@ -21,22 +21,17 @@ export class AdminAgendaComponent implements OnInit {
   citas: Cita[] = [];
   fechaActual: Date = new Date();
   diasSemana = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
-  calendarioDias: { fecha: Date, citas: any[] }[] = [];
+  calendarioDias: { fecha: Date, citas: { hora: string, cliente: string }[] }[] = [];
+  usuario_ID: string = '';
 
   constructor(private agendaService: AgendaService,
-    private adminService: AdminService,
+    private citasService: CitasService,
     private usuarioService: UsuarioService) { }
 
   ngOnInit(): void {
     this.usuarioService.getUsuarios().subscribe(usuarios => {
       this.profesionales = usuarios.filter(u => u.rol === 'profesional');
-      console.log('Profesionales:', this.profesionales);
-      if (this.profesionales.length > 0) {
-        this.profesionalSeleccionado = this.profesionales[0];
-        this.onProfesionalChange(); // carga agenda automáticamente al iniciar
-      }
     });
-
     this.generarCalendario();
   }
 
@@ -44,16 +39,17 @@ export class AdminAgendaComponent implements OnInit {
     if (!this.profesionalSeleccionado) return;
     const mes = this.fechaActual.getMonth() + 1;
     const anio = this.fechaActual.getFullYear();
-    this.adminService.getCitasPorMesYProfesional(this.profesionalSeleccionado.id!, mes, anio)
+    this.citasService.getCitasPorMesYProfesional(this.profesionalSeleccionado._id!, mes, anio)
       .subscribe(citas => {
         this.citas = citas;
-        console.log('Citas cargadas:', this.citas);
         this.asignarCitasAlCalendario(citas);
       });
   }
 
   cambiarMes(offset: number): void {
-    this.fechaActual.setMonth(this.fechaActual.getMonth() + offset);
+    const nuevaFecha = new Date(this.fechaActual);
+    nuevaFecha.setMonth(this.fechaActual.getMonth() + offset);
+    this.fechaActual = nuevaFecha;
     this.onProfesionalChange();
   }
 
@@ -67,7 +63,7 @@ export class AdminAgendaComponent implements OnInit {
     const totalDias = ultimoDiaMes.getDate();
     // Días vacíos al inicio
     for (let i = 0; i < primerDiaSemana; i++) {
-      this.calendarioDias.push({ fecha: new Date(0), citas: [] });
+      this.calendarioDias.push({ fecha: null as any, citas: [] });
     }
     // Días del mes
     for (let i = 1; i <= totalDias; i++) {
@@ -76,11 +72,12 @@ export class AdminAgendaComponent implements OnInit {
     }
   }
 
-  asignarCitasAlCalendario(citas: any[]): void {
+  asignarCitasAlCalendario(citasObtenidas: any[]): void {
     this.generarCalendario(); // limpia y genera el mes de nuevo
-    for (let cita of citas) {
+    for (let cita of citasObtenidas) {
       const fechaCita = new Date(cita.fecha);
       const dia = this.calendarioDias.find(d =>
+        d.fecha &&
         d.fecha.getDate() === fechaCita.getDate() &&
         d.fecha.getMonth() === fechaCita.getMonth() &&
         d.fecha.getFullYear() === fechaCita.getFullYear()
@@ -88,34 +85,14 @@ export class AdminAgendaComponent implements OnInit {
       if (dia) {
         dia.citas.push({
           hora: cita.hora,
-          cliente: cita.usuario_ID
+          cliente: cita.usuario_ID?.nombre || 'Cliente sin nombre'
         });
       }
+      this.usuario_ID = cita.usuario_ID;
     }
   }
 
-  getDiaCalendario(index: number): number | '' {
-    const fecha = new Date(this.fechaActual.getFullYear(), this.fechaActual.getMonth(), 1);
-    const primerDiaSemana = fecha.getDay();
-    const dia = index - primerDiaSemana + 1;
-
-    const totalDias = new Date(this.fechaActual.getFullYear(), this.fechaActual.getMonth() + 1, 0).getDate();
-    return dia > 0 && dia <= totalDias ? dia : '';
-  }
-
-  hayCitaEnDia(index: number): boolean {
-    const dia = this.getDiaCalendario(index);
-    if (!dia) return false;
-
-    const fecha = new Date(this.fechaActual.getFullYear(), this.fechaActual.getMonth(), dia).toISOString().slice(0, 10);
-    return this.citas.some(c => c.fecha?.startsWith(fecha));
-  }
-
-  getCitasDelDia(index: number): Cita[] {
-    const dia = this.getDiaCalendario(index);
-    if (!dia) return [];
-
-    const fecha = new Date(this.fechaActual.getFullYear(), this.fechaActual.getMonth(), dia).toISOString().slice(0, 10);
-    return this.citas.filter(c => c.fecha?.startsWith(fecha));
-  }
+  // getCitasDelDia(dia: { fecha: Date, citas: Cita[] } | null): Cita[] {
+  //   return dia?.citas || [];
+  // }
 }

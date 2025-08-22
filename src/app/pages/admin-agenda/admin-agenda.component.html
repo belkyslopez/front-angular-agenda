@@ -4,7 +4,8 @@
   <!-- Selector de profesional -->
   <div class="mb-4">
     <label class="block font-semibold mb-1">Seleccionar profesional:</label>
-    <select [(ngModel)]="profesionalSeleccionado" (change)="onProfesionalChange()" class="border rounded px-2 py-1 w-full">
+    <select [(ngModel)]="profesionalSeleccionado" (change)="onProfesionalChange()" class="border rounded px-2 py-1 w-full" placeholder="-- Seleccione un profesional --">
+      <option disabled selected value="">-- Seleccione un profesional --</option>
       <option *ngFor="let prof of profesionales" [ngValue]="prof">{{ prof.nombre }}</option>
     </select>
   </div>
@@ -19,17 +20,19 @@
   </div>
 
   <!-- Agenda mensual simple -->
-  <div class="grid grid-cols-7 gap-2 text-sm text-center">
-    <div class="font-bold" *ngFor="let dia of ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb']">{{ dia }}</div>
-    <ng-container *ngFor="let day of [].constructor(42)">
-      <div class="border h-20 p-1 text-left" [class.bg-pink-100]="hayCitaEnDia(day)">
-        <span class="text-xs font-semibold">{{ getDiaCalendario(day) }}</span>
-        <div class="text-[10px] mt-1" *ngFor="let cita of getCitasDelDia(day)">
-          {{ cita.hora }} -
-            <!-- {{ cita.hora }} - {{ cita.servicio.Id?.nombre }} -->
-        </div>
-      </div>
-    </ng-container>
+<div class="grid grid-cols-7 gap-2">
+  <div *ngFor="let dia of calendarioDias"
+       class="p-2 border rounded min-h-[80px] relative"
+       [class.bg-red-100]="!dia.fecha || dia.fecha.getTime() === 0">
+    <!-- Día del mes -->
+    <div *ngIf="dia.fecha && dia.fecha.getTime() !== 0">
+      <span class="font-bold">{{ dia.fecha.getDate() }}</span>
+      <!-- Mostrar citas -->
+      <ul>
+       <li *ngFor="let cita of dia.citas" class="text-sm text-blue-600">
+          {{ cita.hora }} - {{ cita.cliente }}
+        </li>
+      </ul>
+    </div>
   </div>
 </div>
-
